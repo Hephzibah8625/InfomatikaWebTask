@@ -303,6 +303,23 @@ const getPositionStyle = (top, left, width, height) => {
 
 <template>
   <div class="wrapper" ref="wrapper">
+    <div class="navbar">
+      <div><a href="#">БИЛЕТЫ И АБОНИМЕНТЫ</a></div>
+
+      <div class="navbar__menu">
+        <div><a href="#">Как купить?</a></div>
+        <div><a href="#">Правила</a></div>
+        <div><a href="#">Возврат билетов</a></div>
+      </div>
+
+      <div class="navbar__sign-in">
+        <a href="#">
+          <span class="material-symbols-outlined">login</span>Войти<span class="material-symbols-outlined">menu</span>
+        </a>
+      </div>
+    </div>
+
+    
     <div
       class="enemy-line"
       :style="getPositionStyle(
@@ -351,10 +368,52 @@ const getPositionStyle = (top, left, width, height) => {
   left: 0;
   width: 100%;
   color: white;
+  padding: calc(1vh + 1vw);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+}
+
+.navbar__sign-in {
+  justify-self: end;
+}
+
+.navbar__sign-in a {
+  display: flex;
+  align-items: center;
+  gap: 1vw;
+}
+
+.navbar__menu {
+  display: flex;
+  gap: 5vw;
+}
+
+a, span {
+  font-size: calc(var(--index) * 0.8);
 }
 
 a {
   color: white;
+  position: relative;
+}
+
+a:before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: calc(var(--index) * 0.1);
+  border-radius: calc(var(--index) * 0.1);
+  background-color: white;
+  bottom: 0;
+  left: 0;
+  transform-origin: right;
+  transform: scaleX(0);
+  transition: transform .3s ease-in-out;
+}
+
+a:hover::before {
+  transform-origin: left;
+  transform: scaleX(1);
 }
 
 .enemy-line {
