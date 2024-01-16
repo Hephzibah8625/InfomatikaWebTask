@@ -12,6 +12,7 @@
   -moz-osx-font-smoothing: grayscale;
 
   --index: calc(1vh + 1vw);
+  overflow: hidden;
 }
 
 * {

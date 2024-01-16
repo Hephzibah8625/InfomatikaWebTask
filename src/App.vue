@@ -1,5 +1,5 @@
 <script setup>
-import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { onBeforeMount, onBeforeUnmount, onMounted, ref } from 'vue';
 import Hexagon from './components/Hexagon.vue';
 
 const initList = [
@@ -27,6 +27,10 @@ const endIndex = ref(currentIndex.value + displayDelta.value);
 const updateKey = ref(0);
 
 // Lifecycle Hooks
+
+onBeforeMount(() => {
+  calculateCoords();
+});
 
 onMounted(() => {
   for (let i = startIndex.value; i <= endIndex.value; i++) {
@@ -299,6 +303,23 @@ const getPositionStyle = (top, left, width, height) => {
   }
 }
 
+const getCircleStyle = (idx) => {
+  console.log(idx);
+  const middleIdx = Math.floor(coords.value.length / 2);
+
+  const dH = coords.value[middleIdx].y - coords.value[middleIdx + idx].y + coords.value[middleIdx].height / 2;
+  const dW = coords.value[middleIdx + idx].x - coords.value[middleIdx].x - coords.value[middleIdx].width / 2;
+
+  const radius = Math.sqrt(dH * dH + dW * dW);
+
+  return getPositionStyle(
+    height.value / 2 - radius,
+    width.value / 2 - radius,
+    radius * 2,
+    radius * 2
+  );
+}
+
 </script>
 
 <template>
@@ -325,7 +346,7 @@ const getPositionStyle = (top, left, width, height) => {
       :style="getPositionStyle(
         height / 2 - initHeight / 2,
         0,
-        width / 2 - initWidth,
+        width / 2 - initWidth * 2,
         initHeight / 2
       )"
     >
@@ -335,13 +356,19 @@ const getPositionStyle = (top, left, width, height) => {
       class="enemy-line"
       :style="getPositionStyle(
         height / 2,
-        width / 2 + initWidth,
-        width / 2 - initWidth,
+        width / 2 + initWidth * 2,
+        width / 2 - initWidth * 2,
         initHeight / 2
       )"
     >
       <div>{{  initList[currentIndex].right_team }}</div>
     </div>
+
+    <div
+      class="circle"
+      v-for="i in displayDelta"
+      :style="getCircleStyle(i)"
+    />
 
     <Hexagon
       v-for="(hexagonData, hexagonIdx) of listToDisplay"
@@ -419,6 +446,18 @@ a:hover::before {
 .enemy-line {
   position: absolute;
   background-color: white;
+  font-size: calc(var(--index) * 1.2);
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.circle {
+  position: absolute;
+  border: 1px solid lightgray;
+  border-radius: 100%;
+  z-index: -1000;
 }
 
 </style>
