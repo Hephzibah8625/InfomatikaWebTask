@@ -119,6 +119,11 @@ const getMonth = (ts) => months[ new Date(ts).getUTCMonth() ];
   padding: calc(var(--index) * 0.3);
   border: 1px solid black;
   border-radius: calc(var(--index) * 0.3);
+  transition: all 0.5s ease;
+}
+
+.hexagon-data__button:hover {
+  transform: scale(1.1, 1.1);
 }
 
 .hexagon-data__option {

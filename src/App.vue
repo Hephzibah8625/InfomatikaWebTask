@@ -24,7 +24,7 @@ const objectsToDisplay = ref(width.value > 1000 ? 5 : 3);
 const displayDelta = ref(Math.floor(objectsToDisplay.value / 2));
 const startIndex = ref(currentIndex.value - displayDelta.value);
 const endIndex = ref(currentIndex.value + displayDelta.value);
-const updateKey = ref(0);
+const touchY = ref(0);
 
 // Lifecycle Hooks
 
@@ -45,15 +45,33 @@ onMounted(() => {
 
   window.addEventListener('wheel', handleWheel);
   window.addEventListener('resize', handleResize);
+  window.addEventListener('touchstart', handleTouchStart);
+  window.addEventListener('touchend', handleTouchEnd);
 });
 
 onBeforeUnmount(() => {
   window.removeEventListener('wheel', handleWheel);
   window.removeEventListener('resize', handleResize);
+  window.addEventListener('touchstart', handleTouchStart);
+  window.addEventListener('touchend', handleTouchEnd);
 });
 
 
 // Functions
+
+const handleTouchStart = (event) => {
+  touchY.value = event.changedTouches[0].pageY;
+}
+
+const handleTouchEnd = (event) => {
+  const offsetY = touchY.value - event.changedTouches[0].pageY;
+  if (offsetY > 0) {
+    handleWheelUp();
+  }
+  else {
+    handleWheelDown();
+  }
+}
 
 const handleResize = () => {
   width.value = window.innerWidth;
@@ -72,10 +90,14 @@ const handleResize = () => {
 
   for (let i = startIndex.value; i <= endIndex.value; i++) {
     if (i < 0) {
-      newDisplayList.push(listToDisplay.value[i + displayDelta.value]);
+      const newElem = {};
+      setNewHexagonParams(newElem, true, i + displayDelta.value);
+      newDisplayList.push(newElem);
     }
     else if (i >= initList.length) {
-      newDisplayList.push(listToDisplay.value[listToDisplay.value.length - 1 - (i - initList.length)]);
+      const newElem = {};
+      setNewHexagonParams(newElem, true, i - displayDelta.value);
+      newDisplayList.push(newElem);
     }
     else {
       newDisplayList.push(initList[i]);
@@ -89,6 +111,7 @@ const handleResize = () => {
 };
 
 const handleWheel = (event) => {
+  console.log(event);
   if (event.deltaY > 0) {
     handleWheelDown();
   }
@@ -108,24 +131,7 @@ const handleWheelUp = () => {
 
     const newElem = isNull ? {} : initList[startIndex.value];
 
-    const styles = {
-      position: 'absolute',
-      transition: 'all 1s ease',
-      height: `${coords.value[0].height}px`,
-      width: `${coords.value[0].width}px`,
-      top: `${coords.value[0].y}px`,
-      left: `${coords.value[0].x}px`,
-    };
-
-    if (isNull) {
-      styles.display = 'none';
-      newElem.isNull = isNull;
-      newElem.id = Math.floor(15 + Math.random() * 100);
-    }
-
-    newElem.styles = styles;
-    newElem.height = coords.value[0].height;
-    newElem.coordIdx = 0;
+    setNewHexagonParams(newElem, isNull, 0);
 
     listToDisplay.value.unshift(newElem);
 
@@ -167,24 +173,7 @@ const handleWheelDown = () => {
 
     const newElem = isNull ? {} : initList[endIndex.value];
 
-    const styles = {
-      position: 'absolute',
-      transition: 'all 1s ease',
-      height: `${coords.value[coords.value.length - 1].height}px`,
-      width: `${coords.value[coords.value.length - 1].width}px`,
-      top: `${coords.value[coords.value.length - 1].y}px`,
-      left: `${coords.value[coords.value.length - 1].x}px`,
-    };
-
-    if (isNull) {
-      styles.display = 'none';
-      newElem.isNull = isNull;
-      newElem.id = Math.floor(15 + Math.random() * 100);
-    }
-
-    newElem.styles = styles;
-    newElem.height = coords.value[coords.value.length - 1].height;
-    newElem.coordIdx = coords.value.length - 1;
+    setNewHexagonParams(newElem, isNull, coords.value.length - 1);
 
     listToDisplay.value.push(newElem);
 
@@ -206,9 +195,6 @@ const handleWheelDown = () => {
       listToDisplay.value[i].styles = styles;
       listToDisplay.value[i].coordIdx = coordIdx - 1;
     }
-
-    updateKey.value++;
-    
     
     // Удаляем самый первый
     listToDisplay.value.shift();
@@ -292,6 +278,27 @@ const setHexagonStyles = () => {
   }
 };
 
+const setNewHexagonParams = (obj, isNull, coordIdx) => {
+  const styles = {
+    position: 'absolute',
+    transition: 'all 1s ease',
+    height: `${coords.value[coordIdx].height}px`,
+    width: `${coords.value[coordIdx].width}px`,
+    top: `${coords.value[coordIdx].y}px`,
+    left: `${coords.value[coordIdx].x}px`,
+  };
+
+  if (isNull) {
+    styles.display = 'none';
+    obj.isNull = isNull;
+    obj.id = Math.floor(15 + Math.random() * 100);
+  }
+
+  obj.styles = styles;
+  obj.height = coords.value[coordIdx].height;
+  obj.coordIdx = coordIdx;
+}
+
 const getPositionStyle = (top, left, width, height) => {
   return {
     top: `${top}px`,
@@ -343,7 +350,7 @@ const getCircleStyle = (idx) => {
       :style="getPositionStyle(
         height / 2 - initHeight / 2,
         0,
-        width / 2 - initWidth * 2,
+        width / 2 - initWidth * 1.4,
         initHeight / 2
       )"
     >
@@ -353,8 +360,8 @@ const getCircleStyle = (idx) => {
       class="enemy-line"
       :style="getPositionStyle(
         height / 2,
-        width / 2 + initWidth * 2,
-        width / 2 - initWidth * 2,
+        width / 2 + initWidth * 1.4,
+        width / 2 - initWidth * 1.4,
         initHeight / 2
       )"
     >
