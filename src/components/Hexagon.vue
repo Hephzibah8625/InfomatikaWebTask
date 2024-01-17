@@ -18,63 +18,25 @@ const calculateStyle = () => {
   }
 }
 
-const calculateOptionFont = () => {
-	return {
-		transition: 'all 1s ease',
-		fontSize: `${props.height * 0.15}px`,
-	}
-}
-
-const calculatePlaceStyle = () => {
-	return {
-		transition: 'all 1s ease',
-		fontSize: `${props.height * 0.09}px`,
-		marginBottom: `${props.height * 0.1}px`,
-	}
-}
-
-const calculateTimeStyle = () => {
-	return {
-		transition: 'all 1s ease',
-		fontSize: `${props.height * 0.09}px`,
-		marginBottom: `${props.height * 0.04}px`,
-	}
-}
-
-const calculateDateStyle = () => {
-	return {
-		transition: 'all 1s ease',
-		fontSize: `${props.height * 0.12}px`,
-		fontWeight: 'bold',
-		marginBottom: `${props.height * 0.03}px`,
-		textTransform: 'uppercase',
-	}
-}
-
-const calculateButtonStyle = () => {
-	return {
-		fontSize: `${props.height * 0.08}px`,
-		padding: `${props.height * 0.04}px`,
-		border: '1px solid black',
-		borderRadius: `${props.height * 0.04}px`,
-	}
-}
-
-const getTime = (ts) => `${new Date(ts).getUTCHours()}:${new Date(ts).getUTCMinutes()}`;
+const getTime = (ts) => {
+  const hours = new Date(ts).getUTCHours();
+  const minutes = new Date(ts).getUTCMinutes();
+  return `${hours > 9 ? hours : '0' + hours}:${minutes > 9 ? minutes : '0' + minutes}`;
+};
 const getDay = (ts) => new Date(ts).getUTCDate();
 const getMonth = (ts) => months[ new Date(ts).getUTCMonth() ];
 </script>
 
 <template>
-  <div class="hexagon-base" :style="calculateStyle()">
-    <div class="hexagon" :style="{ ...calculateStyle(), 'border-radius': `${props.height / 10}px` }" />
+  <div class="hexagon" :style="calculateStyle()">
+    <div class="hexagon-base" :style="{ ...calculateStyle(), 'border-radius': `${props.height / 10}px` }" />
     <div v-if="onCenter" class="hexagon-data">
-			<div :style="calculatePlaceStyle()">{{ hexData.place }}</div>
-			<div :style="calculateDateStyle()">{{ getDay(hexData.timestamp) }} {{ getMonth(hexData.timestamp) }}</div>
-			<div :style="calculateTimeStyle()">{{ getTime(hexData.timestamp) }}</div>
-			<a :style="calculateButtonStyle()">Купить билет</a>
+			<div class="hexagon-data__place">{{ hexData.place }}</div>
+			<div class="hexagon-data__centered-date">{{ getDay(hexData.timestamp) }} {{ getMonth(hexData.timestamp) }}</div>
+			<div class="hexagon-data__time">{{ getTime(hexData.timestamp) }}</div>
+			<a class="hexagon-data__button" href="#" @click.prevent="">Купить билет</a>
     </div>
-		<div v-else class="hexagon-data" :style="calculateOptionFont()">
+		<div v-else class="hexagon-data hexagon-data__option">
 			<div>{{ getDay(hexData.timestamp) }}</div>
 			<div>{{ getMonth(hexData.timestamp) }}</div>
 		</div>
@@ -83,11 +45,12 @@ const getMonth = (ts) => months[ new Date(ts).getUTCMonth() ];
 
 <style scoped>
 
-.hexagon-base {
+.hexagon {
 	transition: all 1s ease;
+  animation: append-animate 0.5s linear;
 }
 
-.hexagon {
+.hexagon-base {
   width: inherit;
   height: inherit;
   background-color: white;
@@ -96,10 +59,9 @@ const getMonth = (ts) => months[ new Date(ts).getUTCMonth() ];
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  box-shadow: 0 5px 5px -5px black;
 }
 
-.hexagon:before, .hexagon:after {
+.hexagon-base:before, .hexagon-base:after {
   content: '';
   display: block;
   position: absolute;
@@ -113,11 +75,11 @@ const getMonth = (ts) => months[ new Date(ts).getUTCMonth() ];
   border-radius: inherit;
 }
 
-.hexagon:after {
+.hexagon-base:after {
   transform: rotate(60deg);
 }
 
-.hexagon:before {
+.hexagon-base:before {
   transform: rotate(-60deg);
 }
 
@@ -133,6 +95,46 @@ const getMonth = (ts) => months[ new Date(ts).getUTCMonth() ];
   flex-direction: column;
   align-items: center;
 	justify-content: center;
+}
+
+.hexagon-data__place {
+  font-size: calc(var(--index) * 0.7);
+  margin-bottom: calc(var(--index) * 0.6);
+}
+
+.hexagon-data__centered-date {
+  font-size: calc(var(--index) * 1.1);
+  font-weight: bold;
+  text-transform: uppercase;
+  margin-bottom: calc(var(--index) * 0.1);
+}
+
+.hexagon-data__time {
+  font-size: calc(var(--index) * 0.7);
+  margin-bottom: calc(var(--index) * 0.3);
+}
+.hexagon-data__button {
+  color: black;
+  font-size: calc(var(--index) * 0.6);
+  padding: calc(var(--index) * 0.3);
+  border: 1px solid black;
+  border-radius: calc(var(--index) * 0.3);
+}
+
+.hexagon-data__option {
+  font-size: calc(var(--index) * 0.8);
+}
+
+
+@keyframes append-animate {
+	from {
+		transform: scale(0);
+		opacity: 0;
+	}
+	to {
+		transform: scale(1);
+		opacity: 1;	
+	}
 }
 
 </style>

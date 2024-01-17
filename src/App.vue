@@ -86,7 +86,7 @@ const handleResize = () => {
 
   calculateCoords();
   setHexagonStyles();
-}
+};
 
 const handleWheel = (event) => {
   if (event.deltaY > 0) {
@@ -95,7 +95,7 @@ const handleWheel = (event) => {
   else {
     handleWheelUp();
   }
-}
+};
 
 const handleWheelUp = () => {
   if (currentIndex.value > 0) {
@@ -154,7 +154,7 @@ const handleWheelUp = () => {
     // Удаляем самый последний
     listToDisplay.value.pop();
   }
-}
+};
 
 const handleWheelDown = () => {
   if (currentIndex.value < initList.length - 1) {
@@ -213,23 +213,21 @@ const handleWheelDown = () => {
     // Удаляем самый первый
     listToDisplay.value.shift();
   }
-}
+};
 
-const onEventClick = (event) => {
-  const toIndex = initList.findIndex((i) => i === event.target.id);
-  if (toIndex < 0) {
-    alert('Error');
-    return;
-  }
-  while (currentIndex.value !== toIndex) {
-    if (currentIndex.value < toIndex) {
-      handleWheelDown();
+const onEventClick = (index) => {
+  let toIndex = index - Math.floor(listToDisplay.value.length / 2);
+  while (toIndex !== 0) {
+    if (toIndex < 0) {
+      handleWheelUp();
+      toIndex++;
     }
     else {
-      handleWheelUp();
+      handleWheelDown();
+      toIndex--;
     }
   }
-}
+};
 
 const calculateCoords = () => {
   const centerX = width.value / 2;
@@ -252,7 +250,7 @@ const calculateCoords = () => {
     const iWidth = coords.value[i + 1].width * 0.7;
 
     coords.value[i] = {
-      x: coords.value[i + 1].x - (100 + iWidth),
+      x: coords.value[i + 1].x - (width.value * 0.05 + iWidth),
       y: coords.value[i + 1].y + coords.value[i + 1].height - iHeight / 2,
       height: iHeight,
       width: iWidth,
@@ -263,7 +261,7 @@ const calculateCoords = () => {
     const iHeight = coords.value[i - 1].height * 0.7;
     const iWidth = coords.value[i - 1].width * 0.7;
     coords.value[i] = {
-      x: coords.value[i - 1].x + (100 + coords.value[i - 1].width),
+      x: coords.value[i - 1].x + (width.value * 0.05 + coords.value[i - 1].width),
       y: coords.value[i - 1].y - iHeight / 2, 
       height: iHeight,
       width: iWidth,
@@ -301,10 +299,9 @@ const getPositionStyle = (top, left, width, height) => {
     width: `${width}px`,
     height: `${height}px`,
   }
-}
+};
 
 const getCircleStyle = (idx) => {
-  console.log(idx);
   const middleIdx = Math.floor(coords.value.length / 2);
 
   const dH = coords.value[middleIdx].y - coords.value[middleIdx + idx].y + coords.value[middleIdx].height / 2;
@@ -318,7 +315,7 @@ const getCircleStyle = (idx) => {
     radius * 2,
     radius * 2
   );
-}
+};
 
 </script>
 
@@ -334,9 +331,9 @@ const getCircleStyle = (idx) => {
       </div>
 
       <div class="navbar__sign-in">
-        <a href="#">
-          <span class="material-symbols-outlined">login</span>Войти<span class="material-symbols-outlined">menu</span>
-        </a>
+        <span class="material-symbols-outlined">login</span>
+        <a href="#">Войти</a>
+        <span class="material-symbols-outlined">menu</span>
       </div>
     </div>
 
@@ -377,7 +374,7 @@ const getCircleStyle = (idx) => {
       :height="hexagonData.height"
       :style="hexagonData.styles"
       :on-center="hexagonIdx === Math.floor(listToDisplay.length / 2)"
-      @click="onEventClick"
+      @click="onEventClick(hexagonIdx)"
     />
   </div>
 </template>
@@ -402,12 +399,13 @@ const getCircleStyle = (idx) => {
 
 .navbar__sign-in {
   justify-self: end;
-}
-
-.navbar__sign-in a {
   display: flex;
   align-items: center;
   gap: 1vw;
+}
+
+.navbar__sign-in span {
+  cursor: pointer;
 }
 
 .navbar__menu {
@@ -446,6 +444,7 @@ a:hover::before {
 .enemy-line {
   position: absolute;
   background-color: white;
+  color: black;
   font-size: calc(var(--index) * 1.2);
   font-weight: bold;
   display: flex;
@@ -455,7 +454,7 @@ a:hover::before {
 
 .circle {
   position: absolute;
-  border: 1px solid lightgray;
+  border: 1px solid darkgray;
   border-radius: 100%;
   z-index: -1000;
 }
