@@ -40,7 +40,7 @@ onMounted(() => {
   }
 
   calculateCoords();
-  setHexagonStyles();
+  setHexagonsStyles();
 
 
   window.addEventListener('wheel', handleWheel);
@@ -91,12 +91,16 @@ const handleResize = () => {
   for (let i = startIndex.value; i <= endIndex.value; i++) {
     if (i < 0) {
       const newElem = {};
-      setNewHexagonParams(newElem, true, i + displayDelta.value);
+      setHexagonParams(newElem, true, i + displayDelta.value);
+      newElem.isNull = true;
+      newElem.id = getNewUniqeId();
       newDisplayList.push(newElem);
     }
     else if (i >= initList.length) {
       const newElem = {};
-      setNewHexagonParams(newElem, true, i - displayDelta.value);
+      setHexagonParams(newElem, true, coords.value.length - (i - initList.length) - 1);
+      newElem.isNull = true;
+      newElem.id = getNewUniqeId();
       newDisplayList.push(newElem);
     }
     else {
@@ -107,11 +111,10 @@ const handleResize = () => {
   listToDisplay.value = newDisplayList;
 
   calculateCoords();
-  setHexagonStyles();
+  setHexagonsStyles();
 };
 
 const handleWheel = (event) => {
-  console.log(event);
   if (event.deltaY > 0) {
     handleWheelDown();
   }
@@ -131,7 +134,12 @@ const handleWheelUp = () => {
 
     const newElem = isNull ? {} : initList[startIndex.value];
 
-    setNewHexagonParams(newElem, isNull, 0);
+    setHexagonParams(newElem, isNull, 0);
+
+    if (isNull) {
+      newElem.isNull = isNull;
+      newElem.id = getNewUniqeId();
+    }
 
     listToDisplay.value.unshift(newElem);
 
@@ -141,20 +149,7 @@ const handleWheelUp = () => {
 
       const coordIdx = listToDisplay.value[i].coordIdx;
 
-      const styles = {
-        ...listToDisplay.value[i].styles,
-        height: `${coords.value[coordIdx + 1].height}px`,
-        width: `${coords.value[coordIdx + 1].width}px`,
-        top: `${coords.value[coordIdx + 1].y}px`,
-        left: `${coords.value[coordIdx + 1].x}px`,
-      };
-
-      listToDisplay.value[i] = {
-        ...listToDisplay.value[i],
-        height: coords.value[coordIdx + 1].height,
-        styles: styles,
-        coordIdx: coordIdx + 1,
-      };
+      setHexagonParams(listToDisplay.value[i], listToDisplay.value[i].isNull, coordIdx + 1);
     }
 
     // Удаляем самый последний
@@ -173,7 +168,12 @@ const handleWheelDown = () => {
 
     const newElem = isNull ? {} : initList[endIndex.value];
 
-    setNewHexagonParams(newElem, isNull, coords.value.length - 1);
+    setHexagonParams(newElem, isNull, coords.value.length - 1);
+
+    if (isNull) {
+      newElem.isNull = isNull;
+      newElem.id = getNewUniqeId();
+    }
 
     listToDisplay.value.push(newElem);
 
@@ -183,17 +183,7 @@ const handleWheelDown = () => {
 
       const coordIdx = listToDisplay.value[i].coordIdx;
 
-      const styles = {
-        ...listToDisplay.value[i].styles,
-        height: `${coords.value[coordIdx - 1].height}px`,
-        width: `${coords.value[coordIdx - 1].width}px`,
-        top: `${coords.value[coordIdx - 1].y}px`,
-        left: `${coords.value[coordIdx - 1].x}px`,
-      };
-
-      listToDisplay.value[i].height = coords.value[coordIdx - 1].height;
-      listToDisplay.value[i].styles = styles;
-      listToDisplay.value[i].coordIdx = coordIdx - 1;
+      setHexagonParams(listToDisplay.value[i], listToDisplay.value[i].isNull, coordIdx - 1);
     }
     
     // Удаляем самый первый
@@ -255,31 +245,15 @@ const calculateCoords = () => {
   }
 };
 
-const setHexagonStyles = () => {
+const setHexagonsStyles = () => {
   for (let i = 0; i < listToDisplay.value.length; i++) {
-
-    const styles = {
-      position: 'absolute',
-      transition: 'all 1s ease',
-      height: `${coords.value[i + 1].height}px`,
-      width: `${coords.value[i + 1].width}px`,
-      top: `${coords.value[i + 1].y}px`,
-      left: `${coords.value[i + 1].x}px`,
-    };
-
-    if (listToDisplay.value[i].isNull) {
-      styles.display = 'none';
-    };
-
-    listToDisplay.value[i].styles = styles;
-    listToDisplay.value[i].height = coords.value[i + 1].height;
-
-    listToDisplay.value[i].coordIdx = i + 1;
+    setHexagonParams(listToDisplay.value[i], listToDisplay.value[i].isNull, i + 1);
   }
 };
 
-const setNewHexagonParams = (obj, isNull, coordIdx) => {
+const setHexagonParams = (obj, isNull, coordIdx) => {
   const styles = {
+    ...obj.styles,
     position: 'absolute',
     transition: 'all 1s ease',
     height: `${coords.value[coordIdx].height}px`,
@@ -290,8 +264,6 @@ const setNewHexagonParams = (obj, isNull, coordIdx) => {
 
   if (isNull) {
     styles.display = 'none';
-    obj.isNull = isNull;
-    obj.id = Math.floor(15 + Math.random() * 100);
   }
 
   obj.styles = styles;
@@ -323,6 +295,14 @@ const getCircleStyle = (idx) => {
     radius * 2
   );
 };
+
+const getNewUniqeId = () => {
+  let id = Math.floor(15 + Math.random() * 100);
+  while (initList.findIndex((i) => i.id === id) !== -1) {
+    id = Math.floor(15 + Math.random() * 100);
+  }
+  return id;
+}
 
 </script>
 
