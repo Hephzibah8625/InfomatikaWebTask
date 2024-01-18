@@ -309,7 +309,7 @@ const getNewUniqeId = () => {
 <template>
   <div class="wrapper" ref="wrapper">
     <div class="navbar">
-      <div><a href="#">БИЛЕТЫ И АБОНИМЕНТЫ</a></div>
+      <div><a href="#">БИЛЕТЫ И АБОНЕМЕНТЫ</a></div>
 
       <div class="navbar__menu">
         <div><a href="#">Как купить?</a></div>
